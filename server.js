@@ -9,16 +9,14 @@ app.set('view engine', 'ejs');
 
 var port = 3000;
 var baseUrl = 'https://www.esrl.noaa.gov';
-var baseFtp1 = 'ftp://ftp.cdc.noaa.gov';
-var baseFtp2 = 'ftp://140.172.38.84'
-
+var baseFtps = ['ftp://ftp.cdc.noaa.gov', 'ftp://140.172.38.84', 'ftp://140.172.38.83']
 
 app.get('/', function (req, res) {
 	res.redirect('/psd/thredds/catalog.xml');
 })
 
 app.get('*.xml', function (req, res) {
-	console.log(new Date(), req.originalUrl);
+	console.log(new Date(), req.ip, req.originalUrl);
 
 	request(baseUrl + req.originalUrl, function (error, response, body) {
 		if (error) {
@@ -59,8 +57,11 @@ app.get('*.xml', function (req, res) {
 
 				var pathMeta = dataPath.startsWith('/') ? dataPath : baseOdap + dataPath;
 				var pathData = dataPath.startsWith('/') ? dataPath : baseHttp + dataPath;
-				var pathFtp1 = baseFtp1 + (dataPath.startsWith('/') ? dataPath : '/' + dataPath);
-				var pathFtp2 = baseFtp2 + (dataPath.startsWith('/') ? dataPath : '/' + dataPath);
+
+				var ftpPath = (dataPath.startsWith('/') ? dataPath : '/' + dataPath);
+				var pathFtp = baseFtps.map(function(ftp) {
+					return ftp + ftpPath;
+				});
 
 				datasets.push({
 					name: name,
@@ -69,7 +70,7 @@ app.get('*.xml', function (req, res) {
 					id: id,
 					pathMeta: pathMeta,
 					pathData: pathData,
-					pathFtp: [ pathFtp1, pathFtp2 ]
+					pathFtp: pathFtp
 				});
 
 			} else {
