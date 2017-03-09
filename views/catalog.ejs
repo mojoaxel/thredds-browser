@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		footer {
+			display: none;
+		}
+		textarea {
+			width: 100%;
+			min-height: 400px;
+		}
+	</style>
+</head>
+<body>
+	<h1><%= title %></h1>
+
+	<% if (links && links.length) { %>
+	<h2>Links</h2>
+	<ul>
+		<% links.forEach(function(link) { %>
+			<li><a href="<%- link.href %>"><%- link.title %></a></li>
+		<% }); %>
+	</ul>
+	<% } %>
+
+	<% if (datasets && datasets.length) { %>
+	<h2>Datasets</h2>
+	<ul>
+		<% datasets.forEach(function(dataset) { %>
+			<li id="dataset.id">
+				<b><%- dataset.name %></b>
+				<span>[<%- dataset.size %>]</span>
+				<span>(<%- dataset.modified %>)</span>
+				<ul>
+				<% if (dataset.pathMeta) { %>
+				<li><a href="<%- dataset.pathMeta %>">Matadata (JSON)</a></li>
+				<% } %>
+
+				<% if (dataset.pathData) { %>
+				<li><a href="<%- dataset.pathData %>">Data (HTTP)</a></li>
+				<% } %>
+
+				<% if (dataset.pathFtp) { %>
+					<% dataset.pathFtp.forEach(function(ftp, index) { %>
+						<li><a href="<%- ftp %>">DATA <%- index+1 %> (FTP)</a></li>
+					<% }); %>
+				<% } %>
+				</ul>
+			</li>
+		<% }); %>
+	</ul>
+	<% } %>
+
+	<footer>
+		<h3>Thredds response:</h3>
+		<textarea><%- xml %></textarea>
+	</footer>
+</body>
+</html>
