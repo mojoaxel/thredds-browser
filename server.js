@@ -6,98 +6,129 @@ var jsdap = require('jsdap');
 var app = express();
 app.set('view engine', 'ejs');
 
+var config = require('./server.config.json');
 
-var port = 3000;
-var baseUrl = 'https://www.esrl.noaa.gov';
-var baseFtps = ['ftp://ftp.cdc.noaa.gov', 'ftp://140.172.38.84', 'ftp://140.172.38.83']
+serverIndex = 2;
+
+baseUrl = config.servers[serverIndex].base;
+defaultRoute = config.servers[serverIndex].defaultroute;
+baseFtps = config.servers[serverIndex].dataMirrors;
+
+
+app.use(function(req, res, next) {
+	console.log(new Date(), req.ip, req.originalUrl);
+	next();
+})
 
 app.get('/', function (req, res) {
-	res.redirect('/psd/thredds/catalog.xml');
+	res.redirect(defaultRoute);
 })
 
 app.get('*.xml', function (req, res) {
-	console.log(new Date(), req.ip, req.originalUrl);
+	var path = baseUrl + req.originalUrl;
+		request(path, function (error, response, body) {
+				try {
+			if (error) {
+				res.status(response ? response.statusCode : 404).end(error);
+			}
+			if (!response || response.statusCode != 200) {
+				res.status(response ? response.statusCode : 404).end(response);
+			}
 
-	request(baseUrl + req.originalUrl, function (error, response, body) {
-		if (error) {
-			res.status(response ? response.statusCode : 404).end(error);
-		}
-		if (!response || response.statusCode != 200) {
-			res.status(response ? response.statusCode : 404).end(response);
-		}
+			var xml = cheerio.load(body);
 
-		var xml = cheerio.load(body);
+			var title = xml('catalog').attr('name');
 
-		var title = xml('catalog').attr('name');
+			var links = [];
+			var catalogRefs = xml('catalogRef');
+			for (var i=0; i<catalogRefs.length; i++) {
+				var catalogRef = catalogRefs[i];
+				links.push({
+					href: catalogRef.attribs['xlink:href'],
+					title: catalogRef.attribs['xlink:title']
+				});
+			}
 
-		var links = [];
-		var catalogRefs = xml('catalogRef');
-		for (var i=0; i<catalogRefs.length; i++) {
-			var catalogRef = catalogRefs[i];
-			links.push({
-				href: catalogRef.attribs['xlink:href'],
-				title: catalogRef.attribs['xlink:title']
+			var datasets = [];
+			xml('catalog dataset').each(function() {
+				var baseOdap = xml('catalog service[name="odap"]').attr('base')
+					|| xml('catalog service[serviceType="OPENDAP"]').attr('base') || '/';
+				var baseHttp = baseUrl + (xml('catalog service[name="http"]').attr('base')
+					|| xml('catalog service[serviceType="HTTPServer"]').attr('base') || '/');
+
+				var dataPath = xml(this).attr('urlpath');
+				if (dataPath) {
+					var name = xml(this).attr('name');
+					var id = xml(this).attr('id');
+
+					var dataSize = xml('datasize', this);
+					var size = dataSize.text() + ' ' + dataSize.attr('units');
+
+					var modified = xml('date', this).text();
+
+					var pathMeta = dataPath.startsWith('/') ? dataPath : baseOdap + dataPath;
+					var pathData = dataPath.startsWith('/') ? dataPath : baseHttp + dataPath;
+
+					var ftpPath = (dataPath.startsWith('/') ? dataPath : '/' + dataPath);
+					var pathFtp = baseFtps.map(function(ftp) {
+						return ftp + ftpPath;
+					});
+
+					datasets.push({
+						name: name,
+						size: size,
+						modified: modified,
+						id: id,
+						pathMeta: pathMeta,
+						pathData: pathData,
+						pathFtp: pathFtp
+					});
+
+				} else {
+					title = xml(this).attr('id');
+				}
+			});
+
+			res.render('catalog', {
+				title: title,
+				links: links,
+				datasets: datasets,
+				xml: body
+			});
+		} catch (err) {
+			res.status(404);
+			res.render('error', {
+				path: path,
+				error: err
 			});
 		}
-
-		var datasets = [];
-		xml('catalog dataset').each(function() {
-			var baseOdap = xml('catalog service[name="odap"]').attr('base');
-			var baseHttp = baseUrl + xml('catalog service[name="http"]').attr('base');
-
-			var dataPath = xml(this).attr('urlpath');
-			if (dataPath) {
-				var name = xml(this).attr('name');
-				var id = xml(this).attr('id');
-
-				var dataSize = xml('datasize', this);
-				var size = dataSize.text() + ' ' + dataSize.attr('units');
-
-				var modified = xml('date', this).text();
-
-				var pathMeta = dataPath.startsWith('/') ? dataPath : baseOdap + dataPath;
-				var pathData = dataPath.startsWith('/') ? dataPath : baseHttp + dataPath;
-
-				var ftpPath = (dataPath.startsWith('/') ? dataPath : '/' + dataPath);
-				var pathFtp = baseFtps.map(function(ftp) {
-					return ftp + ftpPath;
-				});
-
-				datasets.push({
-					name: name,
-					size: size,
-					modified: modified,
-					id: id,
-					pathMeta: pathMeta,
-					pathData: pathData,
-					pathFtp: pathFtp
-				});
-
-			} else {
-				title = xml(this).attr('id');
-			}
-		});
-
-		res.render('catalog', {
-			title: title,
-			links: links,
-			datasets: datasets,
-			xml: body
-		});
 	});
 
 })
 
-app.get('*.nc', function (req, res) {
-	jsdap.loadDataset(baseUrl + req.originalUrl, function(dataset) {
-		res.setHeader('Content-Type', 'application/json');
-		var json = JSON.stringify(dataset);
-		// remove additional quotes
-		json = json.replace(/\\"/g, '');
-		res.send(json);
+app.get('*.nc?', function (req, res) {
+	var path = baseUrl + req.originalUrl;
+	try {
+		jsdap.loadDataset(path, function(dataset) {
+			res.setHeader('Content-Type', 'application/json');
+			var json = JSON.stringify(dataset);
+			// remove additional quotes
+			json = json.replace(/\\"/g, '');
+			res.send(json);
+		});
+	} catch (e) {
+		res.send("Could not open dataset: " + path, e);
+	}
+})
+
+app.use(function(req, res, next) {
+	request(baseUrl + req.originalUrl, function (error, response, body) {
+		res.setHeader('Content-Type', 'text/plain');
+		res.send(body);
+		next();
 	});
 })
 
-app.listen(port, function () {
-	console.log('listening on port ' + port);
+app.listen(config.express.port, function () {
+	console.log('listening on port ' + config.express.port);
 })
