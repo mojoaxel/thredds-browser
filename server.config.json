@@ -1,5 +1,9 @@
 {
-	"express": {
+	"cache": {
+		"port": 3001,
+		"dir": "./cache/"
+	},
+	"server": {
 		"port": 3000
 	},
 	"servers": [{
