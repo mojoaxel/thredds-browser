@@ -1,0 +1,15 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<style></style>
+</head>
+<body>
+	<h1>Thredds Servers</h1>
+	<ul>
+	<% servers.forEach(function(server) {%>
+		<li><a href="<%- '/' + server.id + server.defaultroute %>"><%- server.base.replace('http://', '').replace('https://', '') %></a></li>
+	<% }); %>
+	</ul>
+</body>
+</html>

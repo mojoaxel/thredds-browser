@@ -7,7 +7,7 @@
 		"port": 3000
 	},
 	"servers": [{
-			"id": "esrl.noaa",
+			"id": "esrl_noaa",
 			"name": "NOAA Earth System Research Laboratory",
 			"base": "https://www.esrl.noaa.gov",
 			"defaultroute": "/psd/thredds/catalog.xml",
@@ -17,15 +17,27 @@
 				"ftp://140.172.38.83"
 			]
 	}, {
-			"id": "po.daac",
+			"id": "po_daac",
 			"name": "NASA Jet Propulsion Laboratory PO.DAAC",
 			"base": "http://thredds.jpl.nasa.gov",
 			"defaultroute": "/thredds/catalog.xml",
 			"dataMirrors": []
 	}, {
-			"id": "nodc.noaa",
+			"id": "opendap_jpl_nasa",
+			"name": "ECCO Near Real-Time Ocean Estimate",
+			"base": "https://opendap.jpl.nasa.gov",
+			"defaultroute": "/opendap/catalog.xml",
+			"dataMirrors": []
+	}, {
+			"id": "nodc_noaa",
 			"name": "National Oceanographic Data Center (NODC)",
 			"base": "https://data.nodc.noaa.gov",
+			"defaultroute": "/thredds/catalog.xml",
+			"dataMirrors": []
+	}, {
+			"id": "ecco_jpl_nasa",
+			"name": "ECCO Near Real-Time Ocean Estimate",
+			"base": "http://ecco.jpl.nasa.gov",
 			"defaultroute": "/thredds/catalog.xml",
 			"dataMirrors": []
 	}]
