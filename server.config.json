@@ -7,7 +7,7 @@
 		"port": 3000
 	},
 	"servers": [{
-			"id": "esrl.noaa",
+			"id": "esrl_noaa",
 			"name": "NOAA Earth System Research Laboratory",
 			"base": "https://www.esrl.noaa.gov",
 			"defaultroute": "/psd/thredds/catalog.xml",
@@ -17,13 +17,13 @@
 				"ftp://140.172.38.83"
 			]
 	}, {
-			"id": "po.daac",
+			"id": "po_daac",
 			"name": "NASA Jet Propulsion Laboratory PO.DAAC",
 			"base": "http://thredds.jpl.nasa.gov",
 			"defaultroute": "/thredds/catalog.xml",
 			"dataMirrors": []
 	}, {
-			"id": "nodc.noaa",
+			"id": "nodc_noaa",
 			"name": "National Oceanographic Data Center (NODC)",
 			"base": "https://data.nodc.noaa.gov",
 			"defaultroute": "/thredds/catalog.xml",
