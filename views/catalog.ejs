@@ -4,7 +4,7 @@
 <head>
 	<style>
 		footer {
-			display: none;
+			display: block;
 		}
 		textarea {
 			width: 100%;
@@ -18,8 +18,8 @@
 	<% if (links && links.length) { %>
 	<h2>Links</h2>
 	<ul>
-		<% links.forEach(function(link) { %>
-			<li><a href="<%- link.href %>"><%- link.title %></a></li>
+		<% links.forEach(function(link){ %>
+			<%- include('link', { link: link }); %>
 		<% }); %>
 	</ul>
 	<% } %>
@@ -27,27 +27,8 @@
 	<% if (datasets && datasets.length) { %>
 	<h2>Datasets</h2>
 	<ul>
-		<% datasets.forEach(function(dataset) { %>
-			<li id="dataset.id">
-				<b><%- dataset.name %></b>
-				<span>[<%- dataset.size %>]</span>
-				<span>(<%- dataset.modified %>)</span>
-				<ul>
-				<% if (dataset.pathMeta) { %>
-				<li><a href="<%- dataset.pathMeta %>">Matadata (JSON)</a></li>
-				<% } %>
-
-				<% if (dataset.pathData) { %>
-				<li><a href="<%- dataset.pathData %>">Data (HTTP)</a></li>
-				<% } %>
-
-				<% if (dataset.pathFtp) { %>
-					<% dataset.pathFtp.forEach(function(ftp, index) { %>
-						<li><a href="<%- ftp %>">DATA (FTP) Server <%- index+1 %></a></li>
-					<% }); %>
-				<% } %>
-				</ul>
-			</li>
+		<% datasets.forEach(function(dataset){ %>
+			<%- include('dataset', { dataset: dataset }); %>
 		<% }); %>
 	</ul>
 	<% } %>

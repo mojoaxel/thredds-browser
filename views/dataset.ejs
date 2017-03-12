@@ -1,0 +1,43 @@
+<li id="<%- dataset.id %>">
+	<b><%- dataset.name %></b>
+
+	<% if (dataset.size) { %>
+	<span>[<%- dataset.size %>]</span>
+	<% } %>
+
+	<% if (dataset.date) { %>
+	<span>[<%- dataset.date %>]</span>
+	<% } %>
+
+	<br/>
+
+	<% if (dataset.path_meta) { %>
+	<span><a href="<%- dataset.path_meta %>">Matadata (JSON)</a></span>
+	<% } %>
+
+	<% if (dataset.path_data) { %>
+	<span><a href="<%- dataset.path_data %>">(HTTP)</a></span>
+	<% } %>
+
+	<% if (dataset.path_ftp) { %>
+		<% dataset.path_ftp.forEach(function(ftp, index) { %>
+			<span><a href="<%- ftp %>">(FTP<%- index+1 %>)</a></span>
+		<% }); %>
+	<% } %>
+
+	<% if (dataset.links && dataset.links.length) { %>
+	<ul>
+		<% dataset.links.forEach(function(link){ %>
+			<%- include('link', { link: link }); %>
+		<% }); %>
+	</ul>
+	<% } %>
+
+	<% if (dataset.children && dataset.children.length) { %>
+	<ul>
+		<% dataset.children.forEach(function(dataset){ %>
+			<%- include('dataset', { dataset: dataset }); %>
+		<% }); %>
+	</ul>
+	<% } %>
+</li>

@@ -18,6 +18,7 @@
 			]
 	}, {
 			"id": "po_daac",
+			"disabled": true,
 			"name": "NASA Jet Propulsion Laboratory PO.DAAC",
 			"base": "http://thredds.jpl.nasa.gov",
 			"defaultroute": "/thredds/catalog.xml",
