@@ -25,6 +25,7 @@
 			"dataMirrors": []
 	}, {
 			"id": "opendap_jpl_nasa",
+			"disabled": true,
 			"name": "ECCO Near Real-Time Ocean Estimate",
 			"base": "https://opendap.jpl.nasa.gov",
 			"defaultroute": "/opendap/catalog.xml",
@@ -40,6 +41,12 @@
 			"name": "ECCO Near Real-Time Ocean Estimate",
 			"base": "http://ecco.jpl.nasa.gov",
 			"defaultroute": "/thredds/catalog.xml",
+			"dataMirrors": []
+	}, {
+			"id": "data_nas_nasa_gov",
+			"name": "NAS Data Portal",
+			"base": "https://data.nas.nasa.gov/",
+			"defaultroute": "/thredds/catalog/catalog.xml",
 			"dataMirrors": []
 	}]
 }
